@@ -1,0 +1,33 @@
+# Terraform state files; DO NOT EVER COMMIT THESE
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform variable files with real values
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Terraform working directories and lock files
+.terraform/
+.terraform.lock.hcl
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Plan outputs
+*.tfplan
+
+# AWS credentials (just in case)
+.aws/
+credentials
+*.pem
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
