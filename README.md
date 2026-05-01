@@ -21,14 +21,15 @@ Azure:
 
 ## Repository structure
 
-├── terraform/         # Infrastructure-as-code
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── versions.tf
-│   └── modules/       # Reusable sub-components
-├── docs/              # Architecture diagrams, writeups
-└── README.md
+    .
+    ├── terraform/         # Infrastructure-as-code
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   ├── outputs.tf
+    │   ├── versions.tf
+    │   └── modules/       # Reusable sub-components
+    ├── docs/              # Architecture diagrams, writeups
+    └── README.md
 
 ## More
 
