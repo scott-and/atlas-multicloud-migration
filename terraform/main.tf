@@ -127,3 +127,64 @@ resource "aws_route_table_association" "private_b" {
   subnet_id      = aws_subnet.private_b.id
   route_table_id = aws_route_table.private.id
 }
+
+# ----------------------------------------------------------------------
+# Security groups
+#
+# Self note - ingress / egress rules will be kept as separate resources
+# instead of inline to prevent conflicting rules and import/export better
+# 
+# Egress filtering not impl. here, but applicable in prod environments
+# ----------------------------------------------------------------------
+
+resource "aws_security_group" "alb" {
+  name        = "atlas-tf-alb-sg"
+  description = "allows traffic from internet to the ALB"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "atlas-tf-alb-sg"
+  }
+}
+
+resource "aws_security_group" "ec2" {
+  name        = "atlas-tf-ec2-sg"
+  description = "allows HTTP traffic from ALB to EC2 instances"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "atlas-tf-ec2-sg"
+  }
+}
+
+# Security group ingress rules ----------------------------------------
+
+resource "aws_vpc_security_group_ingress_rule" "allow_alb_http_traffic_from_internet" {
+  security_group_id = aws_security_group.alb.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  from_port         = 80
+  to_port           = 80
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ec2_ingress_from_alb" {
+  security_group_id            = aws_security_group.ec2.id
+  referenced_security_group_id = aws_security_group.alb.id
+  ip_protocol                  = "tcp"
+  from_port                    = 80
+  to_port                      = 80
+}
+
+# Security group egress rules -----------------------------------------
+
+resource "aws_vpc_security_group_egress_rule" "ec2_egress_all" {
+  security_group_id = aws_security_group.ec2.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_egress_all" {
+  security_group_id = aws_security_group.alb.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
