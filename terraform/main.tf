@@ -188,3 +188,153 @@ resource "aws_vpc_security_group_egress_rule" "alb_egress_all" {
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }
+
+# ----------------------------------------------------------------------
+# AMI Data Source Lookup
+# ----------------------------------------------------------------------
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023.*-x86_64"]
+  }
+}
+
+# ----------------------------------------------------------------------
+# EC2 Launch Template
+#
+# name_prefix used instead of name for clean rollover / updates
+# ----------------------------------------------------------------------
+
+resource "aws_launch_template" "web" {
+  name_prefix   = "atlas-tf-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = "t3.micro"
+  user_data     = base64encode(file("./user-data.sh"))
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.ec2.id]
+  }
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_ssm.name
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "atlas-tf-web"
+    }
+  }
+
+}
+
+# ----------------------------------------------------------------------
+# Target Group
+# ----------------------------------------------------------------------
+
+resource "aws_lb_target_group" "web" {
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "instance"
+  name        = "atlas-tf-web-tg"
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+# ----------------------------------------------------------------------
+# ALB / Listener
+# ----------------------------------------------------------------------
+
+resource "aws_lb" "web" {
+  name               = "atlas-tf-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.web.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web.arn
+  }
+}
+
+# ----------------------------------------------------------------------
+# ASG / Policy
+# ----------------------------------------------------------------------
+
+resource "aws_autoscaling_group" "web" {
+  name                      = "atlas-tf-web-asg"
+  vpc_zone_identifier       = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+  min_size                  = 2
+  max_size                  = 4
+  desired_capacity          = 2
+  target_group_arns         = [aws_lb_target_group.web.arn]
+  health_check_type         = "ELB"
+  health_check_grace_period = 60
+
+  launch_template {
+    id      = aws_launch_template.web.id
+    version = "$Latest"
+  }
+}
+
+resource "aws_autoscaling_policy" "cpu" {
+  name                   = "atlas-tf-cpu-target-tracking"
+  autoscaling_group_name = aws_autoscaling_group.web.name
+  policy_type            = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    target_value = 50.0
+
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+  }
+}
+
+# ----------------------------------------------------------------------
+# IAM Roles
+# ----------------------------------------------------------------------
+resource "aws_iam_role" "ec2_ssm" {
+  name = "atlas-tf-ec2-ssm-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm" {
+  role       = aws_iam_role.ec2_ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ec2_ssm" {
+  name = "atlas-tf-ec2-ssm-profile"
+  role = aws_iam_role.ec2_ssm.name
+}
