@@ -1,6 +1,6 @@
 # Atlas Logistics Multi-Cloud Migration
 
-Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Originally built clicking through the AWS console as a B.S. Cloud Computing capstone; rebuilt as IaaC in Terraform.
+Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Originally built clicking through the AWS console as a B.S. Cloud Computing capstone; rebuilt as IaC in Terraform.
 
 ## Status
 

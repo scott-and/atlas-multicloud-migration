@@ -6,7 +6,7 @@
 # Terraform variable files with real values
 *.tfvars
 *.tfvars.json
-!*.tfvars.example
+!terraform.tfvars.example
 
 # Terraform working directories and lock files
 .terraform/
