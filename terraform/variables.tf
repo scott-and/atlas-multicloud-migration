@@ -13,3 +13,15 @@ variable "project_name" {
   type        = string
   default     = "atlas-tf"
 }
+
+variable "db_username" {
+  description = "Username variable for use in atlas db"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "Password variable for use in atlas db"
+  type        = string
+  sensitive   = true
+}

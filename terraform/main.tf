@@ -76,6 +76,19 @@ resource "aws_subnet" "private_b" {
 }
 
 # ----------------------------------------------------------------------
+# RDS Subnet Group
+# ----------------------------------------------------------------------
+
+resource "aws_db_subnet_group" "main" {
+  name       = "atlas-tf-rds-subnet-group"
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  tags = {
+    Name = "atlas-tf-rds-subnet-group"
+  }
+}
+
+# ----------------------------------------------------------------------
 # Networking - Internet Gateway & Routing
 # ----------------------------------------------------------------------
 
@@ -157,6 +170,16 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+resource "aws_security_group" "rds" {
+  name        = "atlas-tf-rds-sg"
+  description = "only allows traffic between RDS and EC2 instances"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "atlas-tf-rds-sg"
+  }
+}
+
 # Security group ingress rules ----------------------------------------
 
 resource "aws_vpc_security_group_ingress_rule" "allow_alb_http_traffic_from_internet" {
@@ -175,6 +198,14 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ec2_ingress_from_alb" {
   to_port                      = 80
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_rds_ingress_from_ec2" {
+  security_group_id            = aws_security_group.rds.id
+  referenced_security_group_id = aws_security_group.ec2.id
+  ip_protocol                  = "tcp"
+  from_port                    = 3306
+  to_port                      = 3306
+}
+
 # Security group egress rules -----------------------------------------
 
 resource "aws_vpc_security_group_egress_rule" "ec2_egress_all" {
@@ -185,6 +216,12 @@ resource "aws_vpc_security_group_egress_rule" "ec2_egress_all" {
 
 resource "aws_vpc_security_group_egress_rule" "alb_egress_all" {
   security_group_id = aws_security_group.alb.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+resource "aws_vpc_security_group_egress_rule" "rds_egress_all" {
+  security_group_id = aws_security_group.rds.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }
@@ -337,4 +374,28 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm" {
 resource "aws_iam_instance_profile" "ec2_ssm" {
   name = "atlas-tf-ec2-ssm-profile"
   role = aws_iam_role.ec2_ssm.name
+}
+
+resource "aws_db_instance" "main" {
+  allocated_storage       = 20 # GiB
+  db_name                 = "atlas"
+  engine                  = "mysql"
+  engine_version          = "8.0"
+  instance_class          = "db.t3.micro"
+  username                = var.db_username
+  password                = var.db_password
+  identifier              = "atlas-tf-db"
+  storage_encrypted       = true
+  storage_type            = "gp3"
+  backup_retention_period = 7 # Days
+  db_subnet_group_name    = aws_db_subnet_group.main.name
+  vpc_security_group_ids  = [aws_security_group.rds.id]
+  publicly_accessible     = false
+  multi_az                = false # Demo-only; enable in prod for AZ failover
+  skip_final_snapshot     = true  # Demo-only; set false in prod to capture a final snapshot
+  deletion_protection     = false # Demo-only; set true in prod to prevent accidental deletes
+
+  tags = {
+    Name = "atlas-tf-db"
+  }
 }

@@ -1,0 +1,2 @@
+db_username = "AVOID_PLAINTEXT_USERNAMES"
+db_password = "AVOID_PLAINTEXT_PASSWORDS"
