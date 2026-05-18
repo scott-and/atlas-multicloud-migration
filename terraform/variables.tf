@@ -25,3 +25,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "sns_email" {
+  description = "Email to be used as endpoint for SNS topic"
+  type        = string
+  sensitive   = true
+}

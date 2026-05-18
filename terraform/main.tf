@@ -376,6 +376,10 @@ resource "aws_iam_instance_profile" "ec2_ssm" {
   role = aws_iam_role.ec2_ssm.name
 }
 
+# ----------------------------------------------------------------------
+# MySQL database creation
+# ----------------------------------------------------------------------
+
 resource "aws_db_instance" "main" {
   allocated_storage       = 20 # GiB
   db_name                 = "atlas"
@@ -397,5 +401,106 @@ resource "aws_db_instance" "main" {
 
   tags = {
     Name = "atlas-tf-db"
+  }
+}
+
+# ----------------------------------------------------------------------
+# SNS Topic, Subscription, and Alarms
+# ----------------------------------------------------------------------
+
+resource "aws_sns_topic" "all_health" {
+  name = "atlas-tf-alarms-topic"
+}
+
+resource "aws_sns_topic_subscription" "all_health" {
+  topic_arn = aws_sns_topic.all_health.arn
+  protocol  = "email"
+  endpoint  = var.sns_email # Multiple endpoint options available; Email chosen for simplicity
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_hosts" {
+  alarm_name          = "alb_host_health"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "HealthyHostCount"
+  namespace           = "AWS/ApplicationELB"
+  period              = 120 # Seconds
+  statistic           = "Average"
+  threshold           = 2
+  alarm_description   = "Monitors the ALB for < 2 healthy instances (ASG minimum)"
+  alarm_actions       = [aws_sns_topic.all_health.arn]
+
+  dimensions = {
+    LoadBalancer = aws_lb.web.arn_suffix
+    TargetGroup  = aws_lb_target_group.web.arn_suffix
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_high_target_response_time" {
+  alarm_name          = "alb_high_target_response_time"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "TargetResponseTime"
+  namespace           = "AWS/ApplicationELB"
+  period              = 120 # Seconds
+  statistic           = "Average"
+  threshold           = 1 # Second(s)
+  alarm_description   = "Monitors the ALB delays >= to 1s"
+  alarm_actions       = [aws_sns_topic.all_health.arn]
+
+  dimensions = {
+    LoadBalancer = aws_lb.web.arn_suffix
+    TargetGroup  = aws_lb_target_group.web.arn_suffix
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "low_cpu_credit_balance" {
+  alarm_name          = "low_cpu_credit_balance"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUCreditBalance"
+  namespace           = "AWS/EC2"
+  period              = 120 # Seconds
+  statistic           = "Average"
+  threshold           = 30 # CPU Credits
+  alarm_description   = "Monitors for CPU credit balance <= to 30"
+  alarm_actions       = [aws_sns_topic.all_health.arn]
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.web.name
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
+  alarm_name          = "rds_high_cpu"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = 120 # Seconds
+  statistic           = "Average"
+  threshold           = 80 # CPU usage as a %
+  alarm_description   = "Monitors for RDS CPU usage > 80%"
+  alarm_actions       = [aws_sns_topic.all_health.arn]
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "rds_low_space" {
+  alarm_name          = "rds_low_space"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "FreeStorageSpace"
+  namespace           = "AWS/RDS"
+  period              = 120 # Seconds
+  statistic           = "Average"
+  threshold           = 2147483648 # Bytes (2 GiB in bytes)
+  alarm_description   = "Monitors for RDS storage space <= 2GB"
+  alarm_actions       = [aws_sns_topic.all_health.arn]
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
   }
 }
