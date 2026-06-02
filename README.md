@@ -5,7 +5,7 @@ Originally built in AWS / Azure consoles for my BSCC capstone, now rebuilt as Ia
 
 ## Status
 
-Phase 4/6 completed
+4/6 Phases completed
 
 [✅] AWS:
 
