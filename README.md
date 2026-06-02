@@ -20,6 +20,7 @@ Work in progress; converting from console-built to Terraform IaC.
 [✅] Phase 4:
     CloudWatch alarms, SNS topic(s), email subscription
 
+
 [🚧] Azure:
 
 [🚧] Phase 5:
