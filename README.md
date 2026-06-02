@@ -4,7 +4,7 @@ Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Ori
 
 ## Status
 
-🚧 **Work in progress.** Converting from console-built to Terraform-managed. Currently scaffolding the project.
+🚧 Work in progress. Converting from console-built to Terraform-managed.
 
 ## Architecture
 
