@@ -1,10 +1,11 @@
 # Atlas Logistics Multi-Cloud Migration
 
-Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Originally built clicking through the AWS console as a B.S. Cloud Computing capstone; rebuilt as IaC in Terraform.
+Multi-cloud IaC infrastructure migration for a fictional logistics company.
+Originally built in AWS / Azure consoles for my BSCC capstone, now rebuilt as IaC in Terraform!
 
 ## Status
 
-Work in progress; converting from console-built to Terraform IaC.
+Phase 4/6 completed
 
 [✅] AWS:
 
@@ -59,3 +60,4 @@ Azure:
 
 - Portfolio: [scottanderson.cloud](https://scottanderson.cloud)
 - Author: Scott Anderson
+- Linkedin- www.linkedin.com/in/scottandersoncloud
