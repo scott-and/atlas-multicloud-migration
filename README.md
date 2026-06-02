@@ -15,7 +15,7 @@ Work in progress; converting from console-built to Terraform IaC.
     EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
     
 [✅] Phase 3:
-    EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
+    RDS (MySQL), DB subnet group, sensitive variable handling/masking
 
 [✅] Phase 4:
     CloudWatch alarms, SNS topic(s), email subscription
