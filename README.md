@@ -4,7 +4,31 @@ Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Ori
 
 ## Status
 
-🚧 Work in progress. Converting from console-built to Terraform-managed.
+Work in progress; converting from console-built to Terraform IaC.
+
+[✅] AWS:
+
+[✅] Phase 1:
+    VPC, public/private subnets across mutliple AZs, IGW, route tables
+    
+[✅] Phase 2:
+    EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
+    
+[✅] Phase 3:
+    EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
+
+[✅] Phase 4:
+    CloudWatch alarms, SNS topic(s), email subscription
+
+[🚧] Azure:
+
+[🚧] Phase 5:
+    Azure Monitor / Entra integration
+
+[🧹] Phase 6:
+    De-provision manually provisioned resources and update DNS records as applicable
+
+Azure:
 
 ## Architecture
 
@@ -28,7 +52,6 @@ Azure:
     │   ├── outputs.tf
     │   ├── versions.tf
     │   └── modules/       # Reusable sub-components
-    ├── docs/              # Architecture diagrams, writeups
     └── README.md
 
 ## More
