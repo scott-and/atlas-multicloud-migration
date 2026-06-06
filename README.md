@@ -1,10 +1,11 @@
 # Atlas Logistics Multi-Cloud Migration
 
-Multi-cloud lift-and-shift infrastructure for a fictional logistics company. Originally built clicking through the AWS console as a B.S. Cloud Computing capstone; rebuilt as IaC in Terraform.
+Multi-cloud IaC infrastructure migration for a fictional logistics company.
+Originally built in AWS / Azure consoles for my BSCC capstone, now rebuilt as IaC in Terraform!
 
 ## Status
 
-Work in progress; converting from console-built to Terraform IaC.
+4/6 Phases completed
 
 [✅] AWS:
 
@@ -15,7 +16,7 @@ Work in progress; converting from console-built to Terraform IaC.
     EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
     
 [✅] Phase 3:
-    EC2, ALB, ASG, CPU target tracking, IAM/SSM configuration
+    RDS (MySQL), DB subnet group, sensitive variable handling/masking
 
 [✅] Phase 4:
     CloudWatch alarms, SNS topic(s), email subscription
@@ -59,3 +60,4 @@ Azure:
 
 - Portfolio: [scottanderson.cloud](https://scottanderson.cloud)
 - Author: Scott Anderson
+- Linkedin- www.linkedin.com/in/scottandersoncloud
