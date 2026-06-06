@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Input Variables
+# AWS Variables
 # ----------------------------------------------------------------------
 
 variable "aws_region" {
@@ -28,6 +28,34 @@ variable "db_password" {
 
 variable "sns_email" {
   description = "Email to be used as endpoint for SNS topic"
+  type        = string
+  sensitive   = true
+}
+
+# ----------------------------------------------------------------------
+# Azure Variables
+# ----------------------------------------------------------------------
+
+variable "azure_subscription_id" {
+  description = "Subscription ID for the target service principal"
+  type        = string
+  sensitive   = true
+}
+
+variable "azure_client_id" {
+  description = "Client ID of the target service principal"
+  type        = string
+  sensitive   = true
+}
+
+variable "azure_client_secret" {
+  description = "Service principal secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "azure_tenant_id" {
+  description = "Tenant ID of the service prinicpal"
   type        = string
   sensitive   = true
 }

@@ -1,3 +1,16 @@
+# ----------------------------------------------------------------------
+# AWS Variables
+# ----------------------------------------------------------------------
+
 db_username = "AVOID_PLAINTEXT_USERNAMES"
 db_password = "AVOID_PLAINTEXT_PASSWORDS"
 sns_email = "YOUR_SNS_EMAIL_HERE@GMAIL.COM"
+
+# ----------------------------------------------------------------------
+# Azure Variables
+# ----------------------------------------------------------------------
+
+azure_subscription_id = "ID_HERE"
+azure_client_id = "ID_HERE"
+azure_client_secret = "SECRET_VALUE_HERE"
+azure_tenant_id = "ID_HERE"
