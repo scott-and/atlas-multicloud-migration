@@ -5,7 +5,7 @@ Originally built in AWS / Azure consoles for my BSCC capstone, now rebuilt as Ia
 
 ## Status
 
-4/6 Phases completed
+[✅] 6/6 Phases completed! 
 
 [✅] AWS:
 
@@ -22,12 +22,12 @@ Originally built in AWS / Azure consoles for my BSCC capstone, now rebuilt as Ia
     CloudWatch alarms, SNS topic(s), email subscription
 
 
-[🚧] Azure:
+[✅] Azure:
 
-[🚧] Phase 5:
+[✅] Phase 5:
     Azure Monitor / Entra integration
 
-[🧹] Phase 6:
+[✅] Phase 6 (Optional):
     De-provision manually provisioned resources and update DNS records as applicable
 
 Azure:
@@ -49,7 +49,8 @@ Azure:
 
     .
     ├── terraform/         # Infrastructure-as-code
-    │   ├── main.tf
+    │   ├── aws-main.tf
+    │   ├── azure-main.tf
     │   ├── variables.tf
     │   ├── outputs.tf
     │   ├── versions.tf
